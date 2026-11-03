@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -58,6 +60,7 @@ fun Main(modifier: Modifier = Modifier) {
     Box {
         LazyColumnExample(modifier)
         ColumnExample(modifier)
+        LazyRowExample(modifier)
         TextFieldExample(modifier)
     }
 }
@@ -118,7 +121,7 @@ fun RowExample(modifier: Modifier = Modifier) {
                 .size(100.dp)
                 .clip(CircleShape)
                 .background(Color.Yellow),
-            alpha = 0.6f,
+            alpha = 0.6f
         )
         Spacer(modifier = Modifier.width(20.dp))
         Image(
@@ -155,29 +158,46 @@ fun TextFieldExample(modifier: Modifier = Modifier) {
     }
 }
 
-// 投影片第 14 頁：定義 Animal 資料類別
 data class Animal(
     val name: String,
     @DrawableRes val imageRes: Int
 )
 
-// 投影片第 14 頁：新增 LazyRowExample
 @Composable
 fun LazyRowExample(modifier: Modifier = Modifier) {
     val animals = listOf(
-        Animal("鴨子", R.drawable.animal0),
-        Animal("企鵝", R.drawable.animal1),
-        Animal("青蛙", R.drawable.animal2),
-        Animal("貓頭鷹", R.drawable.animal3),
-        Animal("海豚", R.drawable.animal4),
-        Animal("牛", R.drawable.animal5),
-        Animal("無尾熊", R.drawable.animal6),
-        Animal("獅子", R.drawable.animal7),
-        Animal("狐狸", R.drawable.animal8),
-        Animal("小雞", R.drawable.animal9)
+        Animal(name = "鴨子", imageRes = R.drawable.animal0),
+        Animal(name = "企鵝", imageRes = R.drawable.animal1),
+        Animal(name = "青蛙", imageRes = R.drawable.animal2),
+        Animal(name = "貓頭鷹", imageRes = R.drawable.animal3),
+        Animal(name = "海豚", imageRes = R.drawable.animal4),
+        Animal(name = "牛", imageRes = R.drawable.animal5),
+        Animal(name = "無尾熊", imageRes = R.drawable.animal6),
+        Animal(name = "獅子", imageRes = R.drawable.animal7),
+        Animal(name = "狐狸", imageRes = R.drawable.animal8),
+        Animal(name = "小雞", imageRes = R.drawable.animal9)
     )
 
-    LazyRow(modifier = modifier) {
-        // 投影片第 15 頁會在此處實作 items Indexed / items
+    LazyRow(
+        modifier = modifier.fillMaxHeight(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        itemsIndexed(animals) { index, animal ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(id = animal.imageRes),
+                    contentDescription = animal.name,
+                    modifier = Modifier.size(150.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "$index ${animal.name}"
+                )
+            }
+        }
     }
 }
