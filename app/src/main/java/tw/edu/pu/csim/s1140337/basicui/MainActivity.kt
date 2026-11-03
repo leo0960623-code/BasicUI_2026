@@ -6,43 +6,44 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
+import androidx.annotation.RawRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import tw.edu.pu.csim.s1140337.basicui.ui.theme.BasicUITheme
 
 class MainActivity : ComponentActivity() {
@@ -66,55 +67,38 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Main(modifier: Modifier = Modifier) {
-    Box {
-        ColumnExample(modifier)
-        LazyRowExample(modifier)
-        TextFieldExample(modifier)
+    Box(modifier = modifier.fillMaxSize()) {
+        VideoSection()       // 頂部影片與切換按鈕
+        LazyRowExample()      // 中間動物滑動卡片（縮小並下移）
+        TextFieldExample()    // 底部文字輸入框
     }
 }
 
 @Composable
-fun ColumnExample(modifier: Modifier = Modifier) {
-    var msg by remember { mutableStateOf("") }
+fun VideoSection(modifier: Modifier = Modifier) {
+    var currentVideoRes by remember { mutableIntStateOf(R.raw.love) }
+
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0x8AE0BBE4))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { msg = "短按" },
-                    onDoubleTap = { msg = "連按兩下" },
-                    onLongPress = { msg = "長按" }
-                )
-            },
-        verticalArrangement = Arrangement.Top,
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("行動應用軟體開發：基本元件")
-        Text("作者：賴鈺霖")
-        Text(msg)
-        RowExample()
-    }
-}
+        SimpleVideoPlayer(videoRes = currentVideoRes)
 
-@Composable
-fun RowExample(modifier: Modifier = Modifier) {
-    Row(modifier = modifier) {
-        Image(
-            painter = painterResource(id = R.drawable.android),
-            contentDescription = "Android icon",
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(Color.Yellow),
-            alpha = 0.6f
-        )
-        Spacer(modifier = Modifier.width(20.dp))
-        Image(
-            painter = painterResource(id = R.drawable.compose),
-            contentDescription = "Compose icon",
-            modifier = Modifier.size(100.dp)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                currentVideoRes = if (currentVideoRes == R.raw.love) {
+                    R.raw.handpan
+                } else {
+                    R.raw.love
+                }
+            }
+        ) {
+            Text(
+                text = if (currentVideoRes == R.raw.love) "切換至手碟影片" else "切換至Love影片"
+            )
+        }
     }
 }
 
@@ -140,6 +124,7 @@ fun TextFieldExample(modifier: Modifier = Modifier) {
         Text(
             text = if (inputText.isBlank()) "尚未輸入內容" else "您輸入的是：$inputText"
         )
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -165,21 +150,23 @@ fun LazyRowExample(modifier: Modifier = Modifier) {
         Animal(name = "小雞", imageRes = R.drawable.animal9)
     )
 
+    // 設定 top padding 將卡片往下方移開，避免擋到上方的切換按鈕
     LazyRow(
-        modifier = modifier.fillMaxHeight(),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 260.dp),
+        horizontalArrangement = Arrangement.Center
     ) {
         itemsIndexed(animals) { index, animal ->
             Card(
-                // 設為 0.5f，讓兩張卡片剛好佔滿畫面寬度
                 modifier = Modifier
-                    .fillParentMaxWidth(0.5f)
-                    .height(260.dp)
-                    .padding(4.dp)
+                    .fillParentMaxWidth(0.65f) // 卡片寬度縮小
+                    .height(200.dp)            // 卡片高度由 280dp 縮至 200dp
+                    .padding(horizontal = 8.dp)
                     .clickable {
                         Toast.makeText(
                             context,
-                            "您點選的動物是：${animal.name}",
+                            "您點選的是 ${animal.name}",
                             Toast.LENGTH_SHORT
                         ).show()
                     },
@@ -196,7 +183,7 @@ fun LazyRowExample(modifier: Modifier = Modifier) {
                     Image(
                         painter = painterResource(id = animal.imageRes),
                         contentDescription = animal.name,
-                        modifier = Modifier.size(120.dp)
+                        modifier = Modifier.size(90.dp) // 動物圖示縮小至 90dp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -206,4 +193,42 @@ fun LazyRowExample(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+@Composable
+fun SimpleVideoPlayer(
+    @RawRes videoRes: Int
+) {
+    val context = LocalContext.current
+
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            playWhenReady = true
+        }
+    }
+
+    // 當 videoRes 改變（按下按鈕切換）時，立即更新播放來源並重新播放
+    LaunchedEffect(videoRes) {
+        val uri = "android.resource://${context.packageName}/$videoRes"
+        exoPlayer.setMediaItem(MediaItem.fromUri(uri))
+        exoPlayer.prepare()
+        exoPlayer.playWhenReady = true
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    AndroidView(
+        factory = { ctx ->
+            PlayerView(ctx).apply {
+                player = exoPlayer
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    )
 }
