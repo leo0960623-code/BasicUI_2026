@@ -1,12 +1,14 @@
 package tw.edu.pu.csim.s1140337.basicui
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,10 +22,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import tw.edu.pu.csim.s1140337.basicui.ui.theme.BasicUITheme
@@ -50,6 +54,11 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Main(modifier = Modifier.padding(innerPadding))
                 }
+                Toast.makeText(
+                    this,
+                    "作者：賴鈺霖",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -58,32 +67,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Main(modifier: Modifier = Modifier) {
     Box {
-        LazyColumnExample(modifier)
         ColumnExample(modifier)
         LazyRowExample(modifier)
         TextFieldExample(modifier)
-    }
-}
-
-@Composable
-fun LazyColumnExample(modifier: Modifier = Modifier) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Add a single item
-        item {
-            Text(text = "標題列")
-        }
-        // Add 50 items
-        items(50) { index ->
-            Text(text = "$index")
-        }
-        // Add another single item
-        item {
-            Text(text = "結尾列")
-        }
     }
 }
 
@@ -134,7 +120,6 @@ fun RowExample(modifier: Modifier = Modifier) {
 
 @Composable
 fun TextFieldExample(modifier: Modifier = Modifier) {
-    // 管理輸入框的文字狀態
     var inputText by remember { mutableStateOf("") }
 
     Column(
@@ -165,6 +150,8 @@ data class Animal(
 
 @Composable
 fun LazyRowExample(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+
     val animals = listOf(
         Animal(name = "鴨子", imageRes = R.drawable.animal0),
         Animal(name = "企鵝", imageRes = R.drawable.animal1),
@@ -183,20 +170,39 @@ fun LazyRowExample(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         itemsIndexed(animals) { index, animal ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize()
+            Card(
+                // 設為 0.5f，讓兩張卡片剛好佔滿畫面寬度
+                modifier = Modifier
+                    .fillParentMaxWidth(0.5f)
+                    .height(260.dp)
+                    .padding(4.dp)
+                    .clickable {
+                        Toast.makeText(
+                            context,
+                            "您點選的動物是：${animal.name}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    },
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFD0BCFF)
+                )
             ) {
-                Image(
-                    painter = painterResource(id = animal.imageRes),
-                    contentDescription = animal.name,
-                    modifier = Modifier.size(150.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "$index ${animal.name}"
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Image(
+                        painter = painterResource(id = animal.imageRes),
+                        contentDescription = animal.name,
+                        modifier = Modifier.size(120.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "$index ${animal.name}"
+                    )
+                }
             }
         }
     }
