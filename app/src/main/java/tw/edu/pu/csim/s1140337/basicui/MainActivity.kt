@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -150,5 +152,32 @@ fun TextFieldExample(modifier: Modifier = Modifier) {
         Text(
             text = if (inputText.isBlank()) "尚未輸入內容" else "您輸入的是：$inputText"
         )
+    }
+}
+
+// 投影片第 14 頁：定義 Animal 資料類別
+data class Animal(
+    val name: String,
+    @DrawableRes val imageRes: Int
+)
+
+// 投影片第 14 頁：新增 LazyRowExample
+@Composable
+fun LazyRowExample(modifier: Modifier = Modifier) {
+    val animals = listOf(
+        Animal("鴨子", R.drawable.animal0),
+        Animal("企鵝", R.drawable.animal1),
+        Animal("青蛙", R.drawable.animal2),
+        Animal("貓頭鷹", R.drawable.animal3),
+        Animal("海豚", R.drawable.animal4),
+        Animal("牛", R.drawable.animal5),
+        Animal("無尾熊", R.drawable.animal6),
+        Animal("獅子", R.drawable.animal7),
+        Animal("狐狸", R.drawable.animal8),
+        Animal("小雞", R.drawable.animal9)
+    )
+
+    LazyRow(modifier = modifier) {
+        // 投影片第 15 頁會在此處實作 items Indexed / items
     }
 }
